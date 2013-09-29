@@ -3,8 +3,8 @@ import os
 
 
 HOME = os.environ['HOME']
-rc_dir_path = os.path.join(HOME, '.thepiratebay')
+rc_dir_path = os.path.join(HOME, '.queuer')
 if not os.path.exists(rc_dir_path):
     os.makedirs(rc_dir_path)
 
-db_path = rc_dir_path + 'thepiratebay.tpb'
+db_path = os.path.join(rc_dir_path + 'queuer.db')

@@ -12,11 +12,17 @@ def init_db(conn, cur):
     and cursor cursor.
     '''
     # Create the shows table.
+    # Schema:
+    # showid | name | link | started | seasons | airtime | airday | torrentkws
     cur.execute('''CREATE TABLE tvshows (showid INTEGER, name TEXT, link TEXT,
 started TEXT, seasons INTEGER, airtime TEXT, airday TEXT, torrent_kws TEXT)''')
     # Create the episode table.
+    # Schema:
+    # showid | seasons_number | seasons_episode_number | episode_number | title
+    # | airdate | status
     cur.execute('''CREATE TABLE episodes (showid INTEGER, season_number INTEGER,
-episode_number INTEGER, title TEXT, airdate TEXT, status VARCHAR(10))''')
+season_episode_number INTEGER, episode_number INTEGER, title TEXT,
+airdate TEXT, status VARCHAR(10))''')
 
     return
 
@@ -26,12 +32,17 @@ def enqueue_episode(episode, torrent_kws, cur):
     '''
     cur.execute('''INSERT INTO episodes VALUES (?, ?, ?, ?, ?, ?, 'QUEUED')''',
                    (episode['showid'], episode['season_number'],
-                    episode['episode_number'], episode['title'],
-                    episode['airdate'], torrent_kws))
+                    episode['season_episode_number'], episode['episode_number'],
+                    episode['title'], episode['airdate']))
 
     return
 
 def enqueue(db):
+    '''
+    The main user-facing function that prompts user for inputs like the tv show
+    name, the keywords, the episodes that they need to download etc. and based
+    on the selections by the user, downloads the appropriate episodes.
+    '''
     tvshow_query = input("Enter tv show name: ")
     torrent_kws = input("Enter other keywords to search for torrents"
                         " (e.g. 720p eztv): ")
@@ -40,15 +51,17 @@ def enqueue(db):
 
     print("Found %d tv show(s)!\n" % len(shows))
 
-    for count, show in enumerate(shows):
+    # Print all the tvshows found.
+    for count, show in enumerate(shows, start=1):
         tvshows.print_tvshow(show, count)
 
+    # Get user input for which tvshow they are looking for.
     while True:
         show_index = int(input("Enter tv show number: "))
         if show_index >= 0 and show_index <= count:
             break
 
-    show = shows[show_index]
+    show = shows[show_index-1]
 
     episodes = tvshows.search_episodes(show['showid'])
 
@@ -68,20 +81,20 @@ def enqueue(db):
                 enqueue_episodes.append(episode)
     # List all the episodes and the user selects which episodes to download.
     elif which == 'list' or which == 'l':
-        for count, episode in enumerate(episodes):
-            tvshows.print_episode(episode, count)
+        for episode in episodes:
+            tvshows.print_episode(episode)
         # The list can be either an episode index or a  list of episode indices
         # or it can be a range like 10-20 (inclusive) or a list of ranges or a
         # list of ranges and indices.
         print()
-        ep_list = (input("Enter episodes (or ranges) to download: ")).split(' ')
+        ep_list = (input("Enter episodes (or ranges) to queue: ")).split(' ')
         for ep in ep_list:
             ep_range = [int(ep_index) for ep_index in ep.split('-')]
             if len(ep_range) == 2:
                 for ep_index in range(ep_range[0], ep_range[1] + 1):
-                    enqueue_episodes.append(episodes[ep_index])
+                    enqueue_episodes.append(episodes[ep_index-1])
             elif len(ep_range) == 1:
-                enqueue_episodes.append(episodes[int(ep)])
+                enqueue_episodes.append(episodes[int(ep)-1])
     else:
         raise Exception('You idiot!')
 
@@ -90,6 +103,7 @@ def enqueue(db):
     conn = sqlite3.connect(db)
     cur = conn.cursor()
 
+    # If the database is not initialized yet, initialize it.
     cur.execute('SELECT * FROM sqlite_master WHERE type=\'table\'')
     if len(cur.fetchall()) == 0:
         init_db(conn, cur)
@@ -106,6 +120,8 @@ def enqueue(db):
         enqueue_episode(episode, torrent_kws, cur)
     # Now unlock the database by committing the transaction.
     cur.execute('COMMIT TRANSACTION')
+
+    return
 
 if __name__ == '__main__':
     enqueue(settings.db_path)

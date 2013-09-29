@@ -17,16 +17,17 @@ class TVShow(object):
 
 
 class Episode(object):
-    def __init__(self, episodeid, showid, season_number, episode_number, title,
-                 airdate):
-        self.episodeid      = episodeid
-        self.showid         = showid
-        self.season_number  = season_number
-        self.episode_number = episode_number
-        self.title          = title
-        self.airdate        = airdate
+    def __init__(self, episodeid, showid, season_number, episode_number,
+                 season_episode_number, title, airdate):
+        self.episodeid             = episodeid
+        self.showid                = showid
+        self.season_number         = season_number
+        self.episode_number        = episode_number
+        self.season_episode_number = season_episode_number
+        self.title                 = title
+        self.airdate               = airdate
 
-    def get_show(cur):
+    def get_show(self, cur):
         cur.execute('''SELECT * FROM tvshows WHERE showid=?''', (self.showid,))
         row = cur.fetchone()
         return TVShow(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
@@ -48,8 +49,15 @@ def search_tvshows(query):
         link = search_result.find('link').string
         started = search_result.find('started').string
         seasons = int(search_result.find('seasons').string)
-        airtime = search_result.find('airtime').string
-        airday = search_result.find('airday').string
+        # airtime and airday might sometimes be not present.
+        try:
+            airtime = search_result.find('airtime').string
+        except AttributeError:
+            airtime = 'n/a'
+        try:
+            airday = search_result.find('airday').string
+        except AttributeError:
+            airday = 'n/a'
 
         tvshow = {'showid'    : showid,
                   'name'      : name,
@@ -81,21 +89,24 @@ def search_episodes(showid):
     for season_soup in soup.select('show > episodelist > season'):
         season_number = int(season_soup['no'])
         for ep_soup in season_soup.find_all('episode'):
-            episode_number = int(ep_soup.find('seasonnum').string)
-            ep_id = int('%d%02d%02d' % (showid, season_number, episode_number))
-            ep = {'episodeid'      : ep_id,
-                  'showid'         : showid,
-                  'season_number'  : season_number,
-                  'episode_number' : episode_number,
-                  'title'          : ep_soup.find('title').string,
-                  'airdate'        : ep_soup.find('airdate').string}
+            episode_number = int(ep_soup.find('epnum').string)
+            season_episode_number = int(ep_soup.find('seasonnum').string)
+            ep_id = int('%d%02d%02d' % (showid, season_number,
+                                        season_episode_number))
+            ep = {'episodeid'             : ep_id,
+                  'showid'                : showid,
+                  'season_number'         : season_number,
+                  'episode_number'        : episode_number,
+                  'season_episode_number' : season_episode_number,
+                  'title'                 : ep_soup.find('title').string,
+                  'airdate'               : ep_soup.find('airdate').string}
             episodes.append(ep)
 
     return episodes
 
-def print_episode(episode, count):
-    print("%2d: s%02de%02d - %-40s (%s)" % (count,
+def print_episode(episode):
+    print("%4d: s%02de%02d - %-40s (%s)" % (int(episode['episode_number']),
                                             int(episode['season_number']),
-                                            int(episode['episode_number']),
+                                            int(episode['season_episode_number']),
                                             episode['title'],
                                             episode['airdate']))
