@@ -2,6 +2,7 @@
 import time
 import sqlite3
 import xmlrpc.client
+from datetime import datetime, date
 
 # Custom imports
 import libtpb
@@ -35,16 +36,22 @@ def poller(db):
     # First check to see if there are QUEUED episodes that are to be downloaded.
     query = ("SELECT tvshows.name, episodes.season_number, "
              "  episodes.season_episode_number,  episodes.episode_number, "
-             "  tvshows.torrent_kws "
+             "  tvshows.torrent_kws, episodes.airdate "
              "FROM episodes JOIN tvshows USING (showid) "
              "WHERE episodes.status = 'QUEUED'")
     cur.execute(query)
     rows = cur.fetchall()
-    print(len(rows))
+    today = date.today()
     for row in rows:
+        # If this episode releases in the future, don't bother trying to
+        # download it now and just skip it.
+        # NOTE: This relies on the info provided by tvrage.com to be correct.
+        airdate = datetime.strptime(row[-1], '%Y-%m-%d')
+        if airdate.date() > today:
+            continue
         # Construct the torrent search string.
         search_string = "%s S%02dE%02d %s" % (row[0], row[1], row[2], row[4])
-        print(search_string)
+        print("Search TPB for:", search_string)
         torrents = libtpb.search_torrents(search_string)
         # If no torrents found for this download, then maybe no torrents are
         # released yet. So just skip it for now.
@@ -52,6 +59,8 @@ def poller(db):
             continue
         # We only need one "best" torrent.
         torrent = torrents[0]
+        print("Adding torrent for download:", torrent['title'])
+        print()
         gid = s.aria2.addUri([torrent['magnet']])
 
     # Now if there are any episodes that have completed downloading, then update
@@ -89,9 +98,10 @@ def poller(db):
         values = (showid,)
         cur.execute(query, values)
         largest_episode_number = cur.fetchone()[0]
-        # Now add all the
+        # Now add all the episodes with episode number larger than the largest
+        # one so far.
         for episode in episodes:
-            if episode[episode_number] > largest_episode_number:
+            if episode['episode_number'] > largest_episode_number:
                 if episode['airdate'] != '0000-00-00':
                     enqueue.enqueue_episode(episode, cur)
 

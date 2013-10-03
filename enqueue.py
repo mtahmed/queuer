@@ -1,5 +1,6 @@
 # Standard imports
 import sqlite3
+from datetime import datetime, date
 
 # Custom imports
 import tvshows
@@ -89,8 +90,11 @@ def enqueue(db):
         today = date.today()
         enqueue_episodes = []
         for episode in episodes:
-            airdate = datetime.strptime(episode['airdate'], '%Y-%m-%d')
-            if airdate.date() > today:
+            try:
+                airdate = datetime.strptime(episode['airdate'], '%Y-%m-%d')
+            except ValueError:
+                continue
+            if airdate.date() >= today:
                 enqueue_episodes.append(episode)
     # List all the episodes and the user selects which episodes to download.
     elif which == 'list' or which == 'l':
