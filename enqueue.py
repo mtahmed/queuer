@@ -2,7 +2,6 @@
 import sqlite3
 
 # Custom imports
-import libtpb
 import tvshows
 import settings
 
@@ -14,26 +13,40 @@ def init_db(conn, cur):
     # Create the shows table.
     # Schema:
     # showid | name | link | started | seasons | airtime | airday | torrentkws
-    cur.execute('''CREATE TABLE tvshows (showid INTEGER, name TEXT, link TEXT,
-started TEXT, seasons INTEGER, airtime TEXT, airday TEXT, torrent_kws TEXT)''')
+    query = ("CREATE TABLE tvshows "
+             "(showid INTEGER, name TEXT, link TEXT, started TEXT, "
+             "seasons INTEGER, airtime TEXT, airday TEXT, torrent_kws TEXT)")
+    cur.execute(query)
     # Create the episode table.
     # Schema:
     # showid | seasons_number | seasons_episode_number | episode_number | title
     # | airdate | status
-    cur.execute('''CREATE TABLE episodes (showid INTEGER, season_number INTEGER,
-season_episode_number INTEGER, episode_number INTEGER, title TEXT,
-airdate TEXT, status VARCHAR(10))''')
+    query = ("CREATE TABLE episodes "
+             "(showid INTEGER, season_number INTEGER, "
+             "season_episode_number INTEGER, episode_number INTEGER, "
+             "title TEXT, airdate TEXT, status VARCHAR(16), gid CHAR(16))")
+    cur.execute(query)
 
     return
 
-def enqueue_episode(episode, torrent_kws, cur):
+def enqueue_episode(episode, cur):
     '''
     Enqueue (add to database) one episode.
     '''
-    cur.execute('''INSERT INTO episodes VALUES (?, ?, ?, ?, ?, ?, 'QUEUED')''',
-                   (episode['showid'], episode['season_number'],
-                    episode['season_episode_number'], episode['episode_number'],
-                    episode['title'], episode['airdate']))
+    cur.execute("INSERT INTO episodes VALUES (?, ?, ?, ?, ?, ?, 'QUEUED', '')",
+                (episode['showid'], episode['season_number'],
+                 episode['season_episode_number'], episode['episode_number'],
+                 episode['title'], episode['airdate']))
+
+    return
+
+def add_tvshow(show, torrent_kws, cur):
+    '''
+    Add a tvshow to database.
+    '''
+    cur.execute("INSERT INTO tvshows VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (show['showid'], show['name'], show['link'], show['started'],
+                 show['seasons'], show['airtime'], show['airday'], torrent_kws))
 
     return
 
@@ -107,19 +120,19 @@ def enqueue(db):
     cur.execute('SELECT * FROM sqlite_master WHERE type=\'table\'')
     if len(cur.fetchall()) == 0:
         init_db(conn, cur)
+        conn.commit()
 
-    # Lock the database for this transaction.
-    while True:
-        try:
-            cur.execute('BEGIN IMMEDIATE TRANSACTION')
-        except sqlite3.OperationalError as e:
-            if e == 'database is locked':
-                print('Database locked for transaction. Retrying ...')
+    # If the tvshow is not in database, add the tvshow first.
+    cur.execute('SELECT * FROM tvshows WHERE showid=?', (show['showid'],))
+    if len(cur.fetchall()) == 0:
+        add_tvshow(show, torrent_kws, cur)
+        conn.commit()
+
     # Now add the episodes one at a time.
     for episode in enqueue_episodes:
-        enqueue_episode(episode, torrent_kws, cur)
-    # Now unlock the database by committing the transaction.
-    cur.execute('COMMIT TRANSACTION')
+        enqueue_episode(episode, cur)
+
+    conn.commit()
 
     return
 
