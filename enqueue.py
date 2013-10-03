@@ -130,7 +130,10 @@ def enqueue(db):
 
     # Now add the episodes one at a time.
     for episode in enqueue_episodes:
-        enqueue_episode(episode, cur)
+        # If the episode airdate is 0000-00-00, then the episode information
+        # is not yet available.
+        if episode['airdate'] != '0000-00-00':
+            enqueue_episode(episode, cur)
 
     conn.commit()
 

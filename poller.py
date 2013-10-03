@@ -7,6 +7,7 @@ import xmlrpc.client
 import libtpb
 import enqueue
 import torrentdl
+import tvshows
 import settings
 
 
@@ -72,6 +73,27 @@ def poller(db):
                  "WHERE gid=?")
         values = (gid,)
         cur.execute(query, values)
+
+    # Now check to see if any of the tv shows have new episodes announced.
+    query = ("SELECT tvshows.showid "
+             "FROM tvshows")
+    cur.execute(query)
+    rows = cur.fetchall()
+    for row in rows:
+        showid = row[0]
+        episodes = tvshows.search_episodes(showid)
+        # Get the largest recorded episode number.
+        query = ("SELECT MAX(episode_number) "
+                 "FROM episodes "
+                 "WHERE showid=?")
+        values = (showid,)
+        cur.execute(query, values)
+        largest_episode_number = cur.fetchone()[0]
+        # Now add all the
+        for episode in episodes:
+            if episode[episode_number] > largest_episode_number:
+                if episode['airdate'] != '0000-00-00':
+                    enqueue.enqueue_episode(episode, cur)
 
 if __name__ == '__main__':
     while True:
