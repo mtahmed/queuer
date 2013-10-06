@@ -56,6 +56,7 @@ def poller(db):
         # If no torrents found for this download, then maybe no torrents are
         # released yet. So just skip it for now.
         if len(torrents) == 0:
+            print("No torrents found. Skipping ...")
             continue
         # We only need one "best" torrent.
         torrent = torrents[0]
