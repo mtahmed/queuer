@@ -51,7 +51,7 @@ def poller(db):
             continue
         # Construct the torrent search string.
         search_string = "%s S%02dE%02d %s" % (row[0], row[1], row[2], row[4])
-        print("Searching TPB for:", search_string)
+        print("Searching TPB for \"%s\" ..." % search_string)
         torrents = libtpb.search_torrents(search_string)
         # If no torrents found for this download, then maybe no torrents are
         # released yet. So just skip it for now.
@@ -95,7 +95,7 @@ def poller(db):
         showname = row[1]
         # Try to search episodes but if there's a failure, just skip.
         try:
-            print("Searching TVRage for new episodes for:", showname)
+            print("Searching TVRage for new episodes for \"%s\" ..." % showname)
             episodes = tvshows.search_episodes(showid)
         except ConnectionResetError:
             print("Unable to get new eipsodes. Skipping ...")
@@ -116,8 +116,7 @@ def poller(db):
                 if episode['airdate'] != '0000-00-00':
                     enqueue.enqueue_episode(episode, cur)
                     enqueued_episodes += 1
-        print("Enqueued %d new eipsodes for tv show: %s" % (enqueued_episodes,
-                                                            showname))
+        print("Enqueued %d new eipsodes." % enqueued_episodes)
         print()
 
 if __name__ == '__main__':
