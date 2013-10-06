@@ -51,12 +51,13 @@ def poller(db):
             continue
         # Construct the torrent search string.
         search_string = "%s S%02dE%02d %s" % (row[0], row[1], row[2], row[4])
-        print("Search TPB for:", search_string)
+        print("Searching TPB for:", search_string)
         torrents = libtpb.search_torrents(search_string)
         # If no torrents found for this download, then maybe no torrents are
         # released yet. So just skip it for now.
         if len(torrents) == 0:
             print("No torrents found. Skipping ...")
+            print()
             continue
         # We only need one "best" torrent.
         torrent = torrents[0]
@@ -85,13 +86,21 @@ def poller(db):
         cur.execute(query, values)
 
     # Now check to see if any of the tv shows have new episodes announced.
-    query = ("SELECT tvshows.showid "
+    query = ("SELECT tvshows.showid, tvshows.name "
              "FROM tvshows")
     cur.execute(query)
     rows = cur.fetchall()
     for row in rows:
         showid = row[0]
-        episodes = tvshows.search_episodes(showid)
+        showname = row[1]
+        # Try to search episodes but if there's a failure, just skip.
+        try:
+            print("Searching TVRage for new episodes for:", showname)
+            episodes = tvshows.search_episodes(showid)
+        except ConnectionResetError:
+            print("Unable to get new eipsodes. Skipping ...")
+            print()
+            continue
         # Get the largest recorded episode number.
         query = ("SELECT MAX(episode_number) "
                  "FROM episodes "
@@ -101,10 +110,15 @@ def poller(db):
         largest_episode_number = cur.fetchone()[0]
         # Now add all the episodes with episode number larger than the largest
         # one so far.
+        enqueued_episodes = 0
         for episode in episodes:
             if episode['episode_number'] > largest_episode_number:
                 if episode['airdate'] != '0000-00-00':
                     enqueue.enqueue_episode(episode, cur)
+                    enqueued_episodes += 1
+        print("Enqueued %d new eipsodes for tv show: %s" % (enqueued_episodes,
+                                                            showname))
+        print()
 
 if __name__ == '__main__':
     while True:
