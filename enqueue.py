@@ -21,11 +21,11 @@ def init_db(conn, cur):
     # Create the episode table.
     # Schema:
     # showid | seasons_number | seasons_episode_number | episode_number | title
-    # | airdate | status
+    # | airdate | status | destination
     query = ("CREATE TABLE episodes "
-             "(showid INTEGER, season_number INTEGER, "
+             "(episodeid INTEGER, showid INTEGER, season_number INTEGER, "
              "season_episode_number INTEGER, episode_number INTEGER, "
-             "title TEXT, airdate TEXT, status VARCHAR(16), gid CHAR(16))")
+             "title TEXT, airdate TEXT, status VARCHAR(16), destination TEXT)")
     cur.execute(query)
 
     return
@@ -34,8 +34,8 @@ def enqueue_episode(episode, cur):
     '''
     Enqueue (add to database) one episode.
     '''
-    cur.execute("INSERT INTO episodes VALUES (?, ?, ?, ?, ?, ?, 'QUEUED', '')",
-                (episode['showid'], episode['season_number'],
+    cur.execute("INSERT INTO episodes VALUES (?, ?, ?, ?, ?, ?, ?, 'QUEUED', '')",
+                (episode['episodeid'], episode['showid'], episode['season_number'],
                  episode['season_episode_number'], episode['episode_number'],
                  episode['title'], episode['airdate']))
 

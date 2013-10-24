@@ -1,4 +1,5 @@
 # Standard imports
+import os
 import time
 import sqlite3
 import xmlrpc.client
@@ -36,7 +37,7 @@ def poller(db):
     # First check to see if there are QUEUED episodes that are to be downloaded.
     query = ("SELECT tvshows.name, episodes.season_number, "
              "  episodes.season_episode_number,  episodes.episode_number, "
-             "  tvshows.torrent_kws, episodes.airdate "
+             "  tvshows.torrent_kws, episodes.episodeid, episodes.airdate "
              "FROM episodes JOIN tvshows USING (showid) "
              "WHERE episodes.status = 'QUEUED'")
     cur.execute(query)
@@ -64,26 +65,32 @@ def poller(db):
         print("Adding torrent for download:", torrent['title'])
         print()
         gid = s.aria2.addUri([torrent['magnet']])
+        status = s.aria2.tellStatus(gid)
+        destination = os.path.join(status['dir'],
+                                   status['bittorrent']['info']['name'])
+        episodeid = row[5]
+        query = ("UPDATE episodes "
+                 "SET status = 'DOWNLOADING', destination = ? "
+                 "WHERE episodeid = ?")
+        cursor.execute(query, (destination, episodeid))
 
     # Now if there are any episodes that have completed downloading, then update
     # their status.
-    query = ("SELECT episodes.gid "
+    query = ("SELECT episodes.episodeid, episodes.destination "
              "FROM episodes "
              "WHERE episodes.status = 'DOWNLOADING'")
     cur.execute(query)
     rows = cur.fetchall()
     # Check with aria2 to see if any of the DOWNLOADING episodes finished. For
     # every such episode, set the status to be COMPLETED.
+    # If the destnation.aria2 file exists, then the file is still not finished.
     for row in rows:
-        gid = row[0]
-        status = s.aria2.tellStatus(gid, ['status'])['status']
-        if status == 'complete':
-            s.aria2.pause(gid)
-        query = ("UPDATE episodes "
-                 "SET status='COMPLETED' "
-                 "WHERE gid=?")
-        values = (gid,)
-        cur.execute(query, values)
+        if not os.path.exists(row[1] + '.aria2'):
+            query = ("UPDATE episodes "
+                    "SET status='COMPLETED' "
+                    "WHERE episodeid=?")
+            values = (row[0],)
+            cur.execute(query, values)
 
     # Now check to see if any of the tv shows have new episodes announced.
     query = ("SELECT tvshows.showid, tvshows.name "

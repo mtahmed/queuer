@@ -1,10 +1,8 @@
 # queuer
 
-Makes it super easy to set up recurring downloads from [thepiratebay](thepiratebay.sx).
+Makes it super easy to set up recurring downloads from [thepiratebay](http://thepiratebay.sx).
 
-# Setting it up
-
-## Settings
+## Installation
 
 Clone the repository to wherever is convenient (e.g. `~/bin/queuer`):
 
@@ -18,7 +16,7 @@ Then clone libtpb:
 
 Edit settings.py appropriately. For most users, the settings are just fine.
 
-## Adding downloads
+## Usage
 
 Run the enqueue.py and follow instructions:
 
@@ -31,30 +29,19 @@ Run the enqueue.py and follow instructions:
   see which ones you want to download.
 
 
-# Dependencies
+## Dependencies
 
-## python3.x
+- python3.x: Yeah. Python 3.x. Start using it.
+- [libtpb](https://bitbucket.org/mtahmed/libtpb): A simple module/library to
+  provide a python interface to thepiratebay
+- [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/bs4/doc/): Python
+  library for pulling data out of HTML/XML files. Used by tvshows.py and libtpb
+  for parsing the data from tvrage.com and thepiratebay.org.
+- [aria2](http://aria2.sourceforge.net/): For now, only the aria2 downloader is
+  supported. You may submit patches to support additional downloaders. Will only
+  need to add a new downloader in torrentdl.py and make changes to how it's used etc.
 
-Yeah. Python 3.x. Start using it.
-
-## libtpb
-
-[libtpb](https://bitbucket.org/mtahmed/libtpb): A simple module/library to
-provide a python interface to thepiratebay
-
-## Beautiful Soup 4
-
-[Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/bs4/doc/):
-Python library for pulling data out of HTML/XML files. Used by tvshows.py
-and libtpb for parsing the data from tvrage.com and thepiratebay.org.
-
-## aria2
-
-For now, only the aria2 downloader is supported. You may submit patches to
-support additional downloaders. Will only need to add a new downloader in
-torrentdl.py and make changes to how it's used etc.
-
-# Notes
+## Notes
 
 - The episodes will download to the default download directory in aria2.
 - Simultaneous downloads limits, upload speeds, download speeds, continuing
