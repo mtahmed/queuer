@@ -6,15 +6,21 @@ Makes it super easy to set up recurring downloads from [thepiratebay](http://the
 
 Clone the repository to wherever is convenient (e.g. `~/bin/queuer`):
 
+    :::bash
     cd ~/bin/
     hg clone https://mtahmed@bitbucket.org/mtahmed/queuer
+    # OR
+    git clone https://github.com/mtahmed/queuer.git
 
 Then clone libtpb:
 
+    :::bash
     cd ~/bin/queuer
     hg clone https://mtahmed@bitbucket.org/mtahmed/libtpb
+    # OR
+    git clone https://github.com/mtahmed/libtpb.git
 
-Edit settings.py appropriately. For most users, the settings are just fine.
+Edit `settings.py` appropriately. For most users, the settings are just fine.
 
 ## Usage
 
