@@ -73,6 +73,7 @@ def poller(db):
                  "SET status = 'DOWNLOADING', destination = ? "
                  "WHERE episodeid = ?")
         cursor.execute(query, (destination, episodeid))
+        conn.commit()
 
     # Now if there are any episodes that have completed downloading, then update
     # their status.
@@ -91,6 +92,7 @@ def poller(db):
                     "WHERE episodeid=?")
             values = (row[0],)
             cur.execute(query, values)
+        conn.commit()
 
     # Now check to see if any of the tv shows have new episodes announced.
     query = ("SELECT tvshows.showid, tvshows.name "
@@ -125,6 +127,7 @@ def poller(db):
                     enqueued_episodes += 1
         print("Enqueued %d new eipsodes." % enqueued_episodes)
         print()
+        conn.commit()
 
 if __name__ == '__main__':
     while True:
