@@ -64,7 +64,17 @@ def poller(db):
         torrent = torrents[0]
         print("Adding torrent for download:", torrent['title'])
         print()
-        gid = s.aria2.addUri([torrent['magnet']])
+        meta_gid = s.aria2.addUri([torrent['magnet']])
+        # Get the gid of the actual download that was started by this metalink
+        # download.
+        while True:
+            try:
+                meta_status = s.aria2.tellStatus(meta_gid)
+                gid = meta_status['followedBy'][0]
+                break
+            except:
+                time.sleep(1)
+                pass
         status = s.aria2.tellStatus(gid)
         destination = os.path.join(status['dir'],
                                    status['bittorrent']['info']['name'])
@@ -72,7 +82,7 @@ def poller(db):
         query = ("UPDATE episodes "
                  "SET status = 'DOWNLOADING', destination = ? "
                  "WHERE episodeid = ?")
-        cursor.execute(query, (destination, episodeid))
+        cur.execute(query, (destination, episodeid))
         conn.commit()
 
     # Now if there are any episodes that have completed downloading, then update
@@ -88,8 +98,8 @@ def poller(db):
     for row in rows:
         if not os.path.exists(row[1] + '.aria2'):
             query = ("UPDATE episodes "
-                    "SET status='COMPLETED' "
-                    "WHERE episodeid=?")
+                     "SET status='COMPLETED' "
+                     "WHERE episodeid=?")
             values = (row[0],)
             cur.execute(query, values)
         conn.commit()
