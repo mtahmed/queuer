@@ -26,20 +26,47 @@ Edit `settings.py` appropriately. For most users, the settings are just fine.
 
 ## Usage
 
-Run the enqueue.py and follow instructions:
+Run the aria2 server with rpc enabled:
 
-- Enter the name of the download (e.g. the name of the tv show)
-- Enter the number of the tv show that you want to add (click the tvrage.com
-  link to verify it is the one you want).
-- Select which episodes you want to download. If you want all the previous
-  episodes to be downloaded as well, select all. If you only want future
-  episodes to be downloaded, select future. You can also list the episodes to
-  see which ones you want to download.
+```bash
+aria2c --enable-rpc --rpc-listen-all
+```
 
+To add new tv shows to track, run the enqueue.py and follow instructions.
+To download a TV show called "some random tvshow", and enqueue all futuer episodes:
+
+```bash
+python enqueue.py
+Enter tv show name: some random tvshow
+Enter other keywords to search for torrents (e.g. 720p eztv): 720p [publichd]
+Found 20 tv show(s)!
+
+ 1: Some Random TVShow (Oct/1/2010)
+    Seasons: 4
+    Airs 21:00 every Sunday
+    http://www.tvrage.com/Some_Random
+
+ 2: Another Random TVShow (Jan/01/2006)
+    Seasons: 1
+    Airs 20:00 every Wednesday
+    http://www.tvrage.com/shows/id-9999
+
+Enter tv show number: 1
+Found 40 episode(s)!
+
+Which episodes to enqueue?
+[a(ll), f(uture), l(ist)]: f
+```
+
+Run poller.py. It will keep scanning the database to look for new announced
+episodes and download released torrents for released episodes.
+```bash
+python poller.py
+```
 
 ## Dependencies
 
-- python3.x: Yeah. Python 3.x. Start using it.
+- python3.x
 - [libtpb](https://bitbucket.org/mtahmed/libtpb): A simple module/library to
   provide a python interface to thepiratebay
 - [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/bs4/doc/): Python
