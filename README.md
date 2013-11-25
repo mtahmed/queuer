@@ -81,3 +81,7 @@ python poller.py
 - The episodes will download to the default download directory in aria2.
 - Simultaneous downloads limits, upload speeds, download speeds, continuing
   downloads etc. is all taken care of by the downloader.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mtahmed/queuer/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
