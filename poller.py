@@ -132,9 +132,13 @@ def poller(db):
         enqueued_episodes = 0
         for episode in episodes:
             if episode['episode_number'] > largest_episode_number:
-                if episode['airdate'] != '0000-00-00':
+                try:
+                    # If it's a valid date, then enqueue the episode.
+                    strptime(episode['airdate'], '%Y-%m-%d')
                     enqueue.enqueue_episode(episode, cur)
                     enqueued_episodes += 1
+                except ValueError:
+                    pass
         print("Enqueued %d new eipsodes." % enqueued_episodes)
         print()
         conn.commit()
