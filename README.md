@@ -57,7 +57,7 @@ Enter tv show number: 1
 Found 40 episode(s)!
 
 Which episodes to enqueue?
-\[a(ll), f(uture), l(ist)\]: f
+[[a(ll), f(uture), l(ist)]]: f
 ```
 
 #### Remove a TV Show
@@ -71,7 +71,7 @@ python queue.py --dequeue
 
  2: Another Random TVShow (Jan/1/2006)
 Which tvshows to dequeue?
-\[space-separated list\]: 1
+[[space-separated list]]: 1
 
 Removed 1 tvshow(s)!
 ```
