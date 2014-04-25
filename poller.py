@@ -7,7 +7,7 @@ from datetime import datetime, date
 
 # Custom imports
 import libtpb
-import enqueue
+import queue
 import torrentdl
 import tvshows
 import settings
@@ -135,7 +135,7 @@ def poller(db):
                 try:
                     # If it's a valid date, then enqueue the episode.
                     strptime(episode['airdate'], '%Y-%m-%d')
-                    enqueue.enqueue_episode(episode, cur)
+                    queue.enqueue_episode(episode, cur)
                     enqueued_episodes += 1
                 except ValueError:
                     pass
