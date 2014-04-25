@@ -32,6 +32,8 @@ Run the aria2 server with rpc enabled:
 aria2c --enable-rpc --rpc-listen-all
 ```
 
+#### Add a TV Show
+
 To add new tv shows to track, run `queue.py --enqueue` and follow instructions.
 To download a TV show called "some random tvshow", and enqueue all future episodes:
 
@@ -55,8 +57,26 @@ Enter tv show number: 1
 Found 40 episode(s)!
 
 Which episodes to enqueue?
-[a(ll), f(uture), l(ist)]: f
+\[a(ll), f(uture), l(ist)\]: f
 ```
+
+#### Remove a TV Show
+
+To remove an enqueued tv show, run `queue.py --dequeue` and select the tv show
+to remove.
+```bash
+python queue.py --dequeue
+
+ 1: Some Random TVShow (Oct/1/2010)
+
+ 2: Another Random TVShow (Jan/1/2006)
+Which tvshows to dequeue?
+\[space-separated list\]: 1
+
+Removed 1 tvshow(s)!
+```
+
+#### Run poller
 
 Run `poller.py`. It will keep scanning the database to look for new announced
 episodes and download released torrents for released episodes.

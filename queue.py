@@ -70,10 +70,18 @@ def dequeue(conn, cur):
     num_removed = 0
     for num in which:
         if num > 0 and num <= num_tvshows:
+            showid = tvshows[num-1][0]
+
             query = ("DELETE FROM tvshows WHERE "
                      "showid = ?")
-            values = (tvshows[num-1][0],)
+            values = (showid,)
             cur.execute(query, values)
+
+            query = ("DELETE FROM episodes WHERE "
+                     "showid = ?")
+            values = (showid,)
+            cur.execute(query, values)
+
             conn.commit()
             num_removed += 1
 
