@@ -32,14 +32,14 @@ Run the aria2 server with rpc enabled:
 aria2c --enable-rpc --rpc-listen-all
 ```
 
-To add new tv shows to track, run the enqueue.py and follow instructions.
-To download a TV show called "some random tvshow", and enqueue all futuer episodes:
+To add new tv shows to track, run `queue.py --enqueue` and follow instructions.
+To download a TV show called "some random tvshow", and enqueue all future episodes:
 
 ```bash
-python enqueue.py
+python queue.py --enqueue
 Enter tv show name: some random tvshow
 Enter other keywords to search for torrents (e.g. 720p eztv): 720p [publichd]
-Found 20 tv show(s)!
+Found 2 tv show(s)!
 
  1: Some Random TVShow (Oct/1/2010)
     Seasons: 4
@@ -58,7 +58,7 @@ Which episodes to enqueue?
 [a(ll), f(uture), l(ist)]: f
 ```
 
-Run poller.py. It will keep scanning the database to look for new announced
+Run `poller.py`. It will keep scanning the database to look for new announced
 episodes and download released torrents for released episodes.
 ```bash
 python poller.py
@@ -81,7 +81,3 @@ python poller.py
 - The episodes will download to the default download directory in aria2.
 - Simultaneous downloads limits, upload speeds, download speeds, continuing
   downloads etc. is all taken care of by the downloader.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mtahmed/queuer/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-

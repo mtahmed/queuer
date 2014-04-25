@@ -1,4 +1,5 @@
 # Standard imports
+import argparse
 import sqlite3
 from datetime import datetime, date
 
@@ -51,7 +52,37 @@ def add_tvshow(show, torrent_kws, cur):
 
     return
 
-def enqueue(db):
+def dequeue(conn, cur):
+    '''Dequeue episode(s).
+    '''
+    query = ("SELECT * FROM tvshows")
+    cur.execute(query)
+    tvshows = cur.fetchall()
+    num_tvshows = len(tvshows)
+
+    for count, tvshow in enumerate(tvshows, start=1):
+        print("%2d: %s (%s)" % (count, tvshow[1], tvshow[3]))
+        print()
+
+    which = input("Which tvshows to dequeue?\n[space-separated list]: ")
+    which = [int(num) for num in which.split(' ')]
+
+    num_removed = 0
+    for num in which:
+        if num > 0 and num <= num_tvshows:
+            query = ("DELETE FROM tvshows WHERE "
+                     "showid = ?")
+            values = (tvshows[num-1][0],)
+            cur.execute(query, values)
+            conn.commit()
+            num_removed += 1
+
+    print()
+    print("Removed %d tvshow(s)!" % num_removed)
+
+    return
+
+def enqueue(conn, cur):
     '''
     The main user-facing function that prompts user for inputs like the tv show
     name, the keywords, the episodes that they need to download etc. and based
@@ -115,22 +146,12 @@ def enqueue(db):
     else:
         raise Exception('You idiot!')
 
-    # Now that we know which episodes to enqeue, we need to open a connection to
-    # the database and add all the episodes.
-    conn = sqlite3.connect(db)
-    cur = conn.cursor()
-
-    # If the database is not initialized yet, initialize it.
-    cur.execute('SELECT * FROM sqlite_master WHERE type=\'table\'')
-    if len(cur.fetchall()) == 0:
-        init_db(conn, cur)
-        conn.commit()
-
     # If the tvshow is not in database, add the tvshow first.
     cur.execute('SELECT * FROM tvshows WHERE showid=?', (show['showid'],))
     if len(cur.fetchall()) == 0:
         add_tvshow(show, torrent_kws, cur)
         conn.commit()
+
 
     # Now add the episodes one at a time.
     for episode in enqueue_episodes:
@@ -144,4 +165,27 @@ def enqueue(db):
     return
 
 if __name__ == '__main__':
-    enqueue(settings.db_path)
+    parser = argparse.ArgumentParser(description="manage the queue")
+    parser.add_argument("-e", "--enqueue", action="store_true",
+                        help="enqueue episode(s)")
+    parser.add_argument("-d", "--dequeue", action="store_true",
+                        help="dequeue episode(s)")
+    args = parser.parse_args()
+
+    db = settings.db_path
+    conn = sqlite3.connect(db)
+    cur = conn.cursor()
+
+    # If the database is not initialized yet, initialize it.
+    cur.execute('SELECT * FROM sqlite_master WHERE type=\'table\'')
+    if len(cur.fetchall()) == 0:
+        init_db(conn, cur)
+        conn.commit()
+
+
+    if args.enqueue:
+        enqueue(conn, cur)
+    elif args.dequeue:
+        dequeue(conn, cur)
+    else:
+        parser.print_help()
