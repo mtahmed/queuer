@@ -20,7 +20,7 @@ hour = 60 * minute
 halfhour = 0.5 * hour
 
 def normalize_name(name):
-    name = re.sub("[ .-)(}{_]+", "_", name)
+    name = re.sub("[ .)(}{_-]+", "_", name)
     name = name.lower()
 
     return name
