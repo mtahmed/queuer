@@ -1,6 +1,7 @@
 # Standard imports
 import os
 import time
+import re
 import sqlite3
 import xmlrpc.client
 from datetime import datetime, date
@@ -17,6 +18,12 @@ seconds = 1
 minute = 60 * seconds
 hour = 60 * minute
 halfhour = 0.5 * hour
+
+def normalize_name(name):
+    name = re.sub("[ .-)(}{_]+", "_", name)
+    name = name.lower()
+
+    return name
 
 def poller(db):
     '''
@@ -64,7 +71,10 @@ def poller(db):
         torrent = torrents[0]
         print("Adding torrent for download:", torrent['title'])
         print()
-        meta_gid = s.aria2.addUri([torrent['magnet']])
+
+        download_dir = os.path.join(settings.dl_path, normalize_name(row[0]))
+        opts = {dir: download_dir}
+        meta_gid = s.aria2.addUri([torrent['magnet']], opts)
         # Get the gid of the actual download that was started by this metalink
         # download.
         while True:

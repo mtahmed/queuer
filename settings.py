@@ -8,3 +8,4 @@ if not os.path.exists(rc_dir_path):
     os.makedirs(rc_dir_path)
 
 db_path = os.path.join(rc_dir_path, 'queuer.db')
+dl_path = "downloads"
