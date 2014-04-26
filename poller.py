@@ -73,7 +73,7 @@ def poller(db):
         print()
 
         download_dir = os.path.join(settings.dl_path, normalize_name(row[0]))
-        opts = {dir: download_dir}
+        opts = {'dir': download_dir}
         meta_gid = s.aria2.addUri([torrent['magnet']], opts)
         # Get the gid of the actual download that was started by this metalink
         # download.
