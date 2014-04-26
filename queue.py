@@ -121,13 +121,13 @@ def enqueue(conn, cur):
     print("Found %d episode(s)!\n" % len(episodes))
 
     which = input("Which episodes to enqueue?\n[a(ll), f(uture), l(ist)]: ")
+    enqueue_episodes = []
     # This is basically asking to enqueue all the episodes found.
     if which == 'all' or which == 'a' or which == '':
         enqueue_episodes = episodes
     # Only enqueue the future episodes.
     elif which == 'future' or which == 'f':
         today = date.today()
-        enqueue_episodes = []
         for episode in episodes:
             try:
                 airdate = datetime.strptime(episode['airdate'], '%Y-%m-%d')
@@ -145,10 +145,10 @@ def enqueue(conn, cur):
         print()
         ep_list = (input("Enter episodes (or ranges) to queue: ")).split(' ')
         for ep in ep_list:
-            ep_range = [int(ep_index) for ep_index in ep.split('-')]
+            ep_range = [int(ep_index) - 1 for ep_index in ep.split('-')]
             if len(ep_range) == 2:
                 for ep_index in range(ep_range[0], ep_range[1] + 1):
-                    enqueue_episodes.append(episodes[ep_index-1])
+                    enqueue_episodes.append(episodes[ep_index])
             elif len(ep_range) == 1:
                 enqueue_episodes.append(episodes[int(ep)-1])
     else:
