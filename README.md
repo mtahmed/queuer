@@ -8,14 +8,7 @@ Clone the repository to wherever is convenient (e.g. `~/bin/queuer`):
 
 ```bash
 cd ~/bin/
-git clone https://github.com/mtahmed/queuer.git
-```
-
-Then clone libtpb:
-
-```bash
-cd ~/bin/queuer
-git clone https://github.com/mtahmed/libtpb.git
+git clone --recursive https://github.com/mtahmed/queuer.git
 ```
 
 Edit `settings.py` appropriately. For most users, the settings are just fine.
