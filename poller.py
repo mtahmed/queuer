@@ -126,7 +126,7 @@ def poller(db):
         try:
             print("Searching TVRage for new episodes for \"%s\" ..." % showname)
             episodes = tvshows.search_episodes(showid)
-        except ConnectionResetError:
+        except:
             print("Unable to get new eipsodes. Skipping ...")
             print()
             continue
