@@ -144,7 +144,7 @@ def poller(db):
             if episode['episode_number'] > largest_episode_number:
                 try:
                     # If it's a valid date, then enqueue the episode.
-                    strptime(episode['airdate'], '%Y-%m-%d')
+                    time.strptime(episode['airdate'], '%Y-%m-%d')
                     queue.enqueue_episode(episode, cur)
                     enqueued_episodes += 1
                 except ValueError:
