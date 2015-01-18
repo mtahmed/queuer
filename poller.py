@@ -7,8 +7,8 @@ import xmlrpc.client
 from datetime import datetime, date
 
 # Custom imports
-import libtpb
-import queue
+import kat
+import queuer
 import torrentdl
 import tvshows
 import settings
@@ -59,8 +59,9 @@ def poller(db):
             continue
         # Construct the torrent search string.
         search_string = "%s S%02dE%02d %s" % (row[0], row[1], row[2], row[4])
-        print("Searching TPB for \"%s\" ..." % search_string)
-        torrents = libtpb.search_torrents(search_string)
+        print("Searching KAT for \"%s\" ..." % search_string)
+        torrents = kat.search(search_string, category=kat.Categories.TV,
+                              sort=kat.Sorting.SEED, order=kat.Sorting.Order.DESC)
         # If no torrents found for this download, then maybe no torrents are
         # released yet. So just skip it for now.
         if len(torrents) == 0:
@@ -69,12 +70,12 @@ def poller(db):
             continue
         # We only need one "best" torrent.
         torrent = torrents[0]
-        print("Adding torrent for download:", torrent['title'])
+        print("Adding torrent for download:", torrent.title)
         print()
 
         download_dir = os.path.join(settings.dl_path, normalize_name(row[0]))
         opts = {'dir': download_dir}
-        meta_gid = s.aria2.addUri([torrent['magnet']], opts)
+        meta_gid = s.aria2.addUri([torrent.magnet], opts)
         # Get the gid of the actual download that was started by this metalink
         # download.
         while True:
@@ -145,7 +146,7 @@ def poller(db):
                 try:
                     # If it's a valid date, then enqueue the episode.
                     time.strptime(episode['airdate'], '%Y-%m-%d')
-                    queue.enqueue_episode(episode, cur)
+                    queuer.enqueue_episode(episode, cur)
                     enqueued_episodes += 1
                 except ValueError:
                     pass
