@@ -1,6 +1,6 @@
 # queuer
 
-Makes it super easy to set up recurring downloads from [thepiratebay](http://thepiratebay.sx).
+Makes it super easy to set up recurring torrent downloads.
 
 ## Installation
 
@@ -76,8 +76,7 @@ python poller.py
 ## Dependencies
 
 - python3.x
-- [libtpb](https://bitbucket.org/mtahmed/libtpb): A simple module/library to
-  provide a python interface to thepiratebay
+- [kat](https://github.com/stephan-mclean/KickassTorrentsAPI): A library to interface with KickAssTorrents.
 - [Beautiful Soup 4](http://www.crummy.com/software/BeautifulSoup/bs4/doc/): Python
   library for pulling data out of HTML/XML files. Used by tvshows.py and libtpb
   for parsing the data from tvrage.com and thepiratebay.org.
