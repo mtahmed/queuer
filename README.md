@@ -1,3 +1,5 @@
+UPDATE: Use popcorntime instead (for legal downloads/free tv shows only).
+
 # queuer
 
 Makes it super easy to set up recurring torrent downloads.
